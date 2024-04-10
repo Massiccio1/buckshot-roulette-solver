@@ -6,7 +6,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Simple Node App</title>
   <style>
-    .item {
+    .noselect {
+      -webkit-user-select: none;
+      /* Safari */
+      -ms-user-select: none;
+      /* IE 10 and IE 11 */
+      user-select: none;
+      /* Standard syntax */
+    }
+
+    .health {
       display: inline-block;
       width: 20px;
       height: 40px;
@@ -19,15 +28,125 @@
       text-align: center;
       line-height: 100px;
     }
+
+    .weapon {
+      display: inline-block;
+      width: 20px;
+      height: 40px;
+      background-color: white;
+      /* Initialize background color to black */
+      color: darkred;
+      /* Initialize text color to white */
+      /* margin: 10px; */
+      cursor: pointer;
+      text-align: center;
+      line-height: 100px;
+      border-style: dotted;
+
+    }
+
+    .weapon2 {
+      width: 20px;
+      height: 40px;
+      background-color: white;
+      /* Initialize background color to black */
+      color: darkred;
+      /* Initialize text color to white */
+      /* margin: 10px; */
+      cursor: pointer;
+      text-align: center;
+      line-height: 100px;
+      border-style: dotted;
+
+    }
+
+    input[type=number] {
+      width: 50px;
+      height: 20px;
+    }
   </style>
 </head>
 
 <body>
-  <h1>Simple Node App</h1>
-  <p class="item" onclick="changeColor(this)">&#9889;</p>
-  <p class="item" onclick="changeColor(this)">&#9889;</p>
-  <p class="item" onclick="changeColor(this)">&#9889;</p>
-  <p class="item" onclick="changeColor(this)">&#9889;</p>
+  <h1 onselectstart="return false">Simple Node App</h1>
+
+
+  <div style="display: inline-block;">
+    <div style="display: inline-block;">
+      <p>player1</p>
+      <div class="p1 noselect" style="display: inline-block; padding-right: 50px">
+        <p class="health" onclick="changeHealth(this)">&#9889;</p>
+        <p class="health" onclick="changeHealth(this)">&#9889;</p>
+        <p class="health" onclick="changeHealth(this)">&#9889;</p>
+        <p class="health" onclick="changeHealth(this)">&#9889;</p>
+        <p class="health" onclick="changeHealth(this)">&#9889;</p>
+        <p class="health" onclick="changeHealth(this)">&#9889;</p>
+      </div>
+    </div>
+    <!-- <p style="width: 50px;"> </p> -->
+    <div style="display: inline-block;">
+      <p>dealer </p>
+      <div class="p2 noselect" style="display: inline-block; padding-right: 50px">
+        <p class="health" onclick="changeHealth(this)">&#9889;</p>
+        <p class="health" onclick="changeHealth(this)">&#9889;</p>
+        <p class="health" onclick="changeHealth(this)">&#9889;</p>
+        <p class="health" onclick="changeHealth(this)">&#9889;</p>
+        <p class="health" onclick="changeHealth(this)">&#9889;</p>
+        <p class="health" onclick="changeHealth(this)">&#9889;</p>
+      </div>
+    </div>
+
+    <div style="display: inline-block;">
+      <div class="wpn noselect" style="display: inline-block; padding-right: 50px" unselectable="on">
+        <p class="weapon" unselectable="on" onclick="changeWeapon(this)">&#128165;</p>
+        <p class="weapon" unselectable="on" onclick="changeWeapon(this)">&#128165;</p>
+        <p class="weapon" unselectable="on" onclick="changeWeapon(this)">&#128165;</p>
+        <p class="weapon" unselectable="on" onclick="changeWeapon(this)">&#128165;</p>
+        <p class="weapon" unselectable="on" onclick="changeWeapon(this)">&#128165;</p>
+        <p class="weapon" unselectable="on" onclick="changeWeapon(this)">&#128165;</p>
+        <p class="weapon" unselectable="on" onclick="changeWeapon(this)">&#128165;</p>
+      </div>
+    </div>
+
+    <div class="wpn noselect" style="display: inline-block;" unselectable="on">
+      <p class="weapon2" style="background-color: darkred; display: inline-block; " unselectable="on">&#128165;</p>
+      <input class="move" id="numberlive" type="number" value="0" min="0" max="8" step="1" />
+      <br>
+      <p class="weapon2" style="background-color: darkslateblue; display: inline-block; " unselectable="on">&#128165;
+      </p>
+      <input class="move" id="numberblank" type="number" value="0" min="0" max="8" step="1" />
+    </div>
+  </div>
+
+
+
+  <!-- Existing list items will go here -->
+
+  <!-- <input type="text" id="new-task" placeholder="Add a new task"> -->
+
+
+  <label for="lang">Language</label>
+  <select name="languages" id="new-task">
+    <option value="handcuffs">handcuffs</option>
+    <option value="glass">magnifying glass</option>
+    <option value="saw">saw</option>
+    <option value="beer">beer</option>
+    <option value="cig">cigarette</option>
+  </select>
+  <button id="add-button">Add Task</button>
+
+
+  <ul id="todo-list">
+  </ul>
+
+  <br>
+  <br>
+
+  <textarea id="responseArea" rows="4" cols="50"></textarea> <!-- Added textarea for response -->
+
+
+
+  <button onclick="sendData()">calculate</button>
 
   <script src="/script.js"></script>
 </body>
