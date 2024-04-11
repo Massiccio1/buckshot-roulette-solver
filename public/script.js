@@ -102,7 +102,7 @@ function sendData() {
             throw new Error('Failed to update dat');
         }
     }).then(data => {
-        document.getElementById('responseArea').value = JSON.stringify(data, null, 2); // Display response in textarea
+        document.getElementById('responseArea').value = JSON.stringify(data, null); // Display response in textarea
     }).catch(error => {
         console.error('Error:', error);
     });
