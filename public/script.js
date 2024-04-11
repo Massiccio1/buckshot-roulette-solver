@@ -65,10 +65,28 @@ function sendData() {
     const live = document.getElementById('numberlive');
     const blank = document.getElementById('numberblank');
 
+    const player_items = document.getElementById('items');
+    const dealer_items = document.getElementById('items2');
+
+    // console.log(player_items.children)
+    let items1 = []
+    for (let i = 0; i < player_items.children.length; i++) {
+        // console.log(player_items.children[i].firstChild.innerText)
+        items1.push(player_items.children[i].firstChild.innerText)
+    }
+    let items2 = []
+    for (let i = 0; i < dealer_items.children.length; i++) {
+        // console.log(player_items.children[i].firstChild.innerText)
+        items2.push(dealer_items.children[i].firstChild.innerText)
+    }
+    console.log(items1)
+    console.log(items2)
+
     let payload = {
         health: health,
         ammo: [live.valueAsNumber, blank.valueAsNumber],
-        known: ammo
+        known: ammo,
+        items: [items1, items2]
     }
 
     fetch('/updateGame', {
@@ -92,13 +110,19 @@ function sendData() {
 
 
 // Get references to HTML elements
-const todoList = document.getElementById("todo-list");
+const todoList = document.getElementById("items");
 const newTaskInput = document.getElementById("new-task");
 const addButton = document.getElementById("add-button");
 
 function addTask() {
     // Get the text from the input field
     const taskText = newTaskInput.value;
+    console.log(taskText)
+    if (taskText == "") {
+        console.log("empty text")
+        return 0;
+
+    }
 
     // Create a new list item
     const listItem = document.createElement("li");
@@ -126,5 +150,46 @@ function addTask() {
     // Clear the input field
     newTaskInput.value = "";
 }
+
+const todoList2 = document.getElementById("items2");
+const newTaskInput2 = document.getElementById("new-task2");
+const addButton2 = document.getElementById("add-button2");
+
+function addTask2() {
+    // Get the text from the input field
+    const taskText = newTaskInput2.value;
+
+
+    if (taskText == "") {
+        return 0;
+    }
+
+    // Create a new list item
+    const listItem = document.createElement("li");
+
+    // Create a task text element
+    const taskTextElement = document.createElement("span");
+    taskTextElement.innerText = taskText;
+
+    // Create a remove button
+    const removeButton = document.createElement("button");
+    removeButton.innerText = "Remove";
+
+    // Add a click event listener to the remove button
+    removeButton.addEventListener("click", function () {
+        listItem.remove(); // Remove the clicked list item
+    });
+
+    // Append the task text and remove button to the list item
+    listItem.appendChild(taskTextElement);
+    listItem.appendChild(removeButton);
+
+    // Append the new list item to the todoList
+    todoList2.appendChild(listItem);
+
+    // Clear the input field
+    newTaskInput2.value = "";
+}
 // Add a click event listener to the "Add Task" button
+addButton2.addEventListener("click", addTask2);
 addButton.addEventListener("click", addTask);

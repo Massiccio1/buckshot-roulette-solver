@@ -16,6 +16,7 @@ app.get("/", (req, res) => {
 // Route to handle updating colors
 app.post("/updateGame", (req, res) => {
   const data = req.body;
+  // console.log(data)
   // You can perform further actions with the received colors data here
   // console.log("Recived data:", data);
 

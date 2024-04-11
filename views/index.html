@@ -68,12 +68,12 @@
 </head>
 
 <body>
-  <h1 onselectstart="return false">Simple Node App</h1>
+  <h1 onselectstart="return false">Buckshot roulette solver</h1>
 
 
   <div style="display: inline-block;">
     <div style="display: inline-block;">
-      <p>player1</p>
+      <p>player</p>
       <div class="p1 noselect" style="display: inline-block; padding-right: 50px">
         <p class="health" onclick="changeHealth(this)">&#9889;</p>
         <p class="health" onclick="changeHealth(this)">&#9889;</p>
@@ -105,6 +105,7 @@
         <p class="weapon" unselectable="on" onclick="changeWeapon(this)">&#128165;</p>
         <p class="weapon" unselectable="on" onclick="changeWeapon(this)">&#128165;</p>
         <p class="weapon" unselectable="on" onclick="changeWeapon(this)">&#128165;</p>
+        <p class="weapon" unselectable="on" onclick="changeWeapon(this)">&#128165;</p>
       </div>
     </div>
 
@@ -123,21 +124,43 @@
   <!-- Existing list items will go here -->
 
   <!-- <input type="text" id="new-task" placeholder="Add a new task"> -->
+  <br>
+  <br>
+  <br>
+
+  <div>
+    <label for="lang">player</label>
+    <select name="items" id="new-task">
+      <option value="handcuffs">handcuffs</option>
+      <option value="glass">magnifying glass</option>
+      <option value="beer">beer</option>
+      <option value="adrenaline">adrenaline</option>
+      <option value="inverter">inverter</option>
+      <option value="saw">saw</option>
+
+    </select>
+    <button id="add-button">Add Item</button>
 
 
-  <label for="lang">Language</label>
-  <select name="languages" id="new-task">
-    <option value="handcuffs">handcuffs</option>
-    <option value="glass">magnifying glass</option>
-    <option value="saw">saw</option>
-    <option value="beer">beer</option>
-    <option value="cig">cigarette</option>
-  </select>
-  <button id="add-button">Add Task</button>
+    <ul id="items">
+    </ul>
+
+    <!-- ------------------------------- -->
+    <label for="lang">dealer</label>
+    <select name="items2" id="new-task2">
+      <option value="handcuffs">handcuffs</option>
+      <option value="glass">magnifying glass</option>
+      <option value="beer">beer</option>
+      <option value="inverter">inverter</option>
+      <option value="saw">saw</option>
+
+    </select>
+    <button id="add-button2">Add Item</button>
 
 
-  <ul id="todo-list">
-  </ul>
+    <ul id="items2">
+    </ul>
+  </div>
 
   <br>
   <br>

@@ -11,12 +11,51 @@ function test() {
     console.log("in test function")
 }
 
+function play(ammo, items) {
+
+}
+
+function solve(ammo, known, items, actions) {
+
+    let ammo_s = ammo[0] + ammo[1]
+
+    if (ammo_s == 0) {
+        actions.push(["no ammo left"])
+        return actions
+    }
+    //out of options
+    let ooo = false
+    while (!ooo) {
+
+    }
+
+    //
+    // if (known[0] == 0 || ammo[0] == 0) {
+    //     //se la prossima è blank o non ci sono live
+    //     let index = items[0].indexOf("inverter");
+    //     console.log("search inverter at: ", index)
+
+    //     if (index >= 0) {
+    //         actions.push("inverter")
+    //         actions.push("shoot")
+    //         items.splice(index, 1); // 2nd parameter means remove one item only
+    //         ammo[1]--
+    //         return actions
+    //     }
+
+
+
+    //     return actions
+    // }
+
+}
+
 function rec_shoot(/** @type {Array} */ ammo, /** @type {Array} */ known, /** @type {Node} */ tree) {
     console.log("----------------------------------")
     console.log(tree)
     console.log(ammo)
     console.log(known)
-    ammo[0] + ammo[1]
+
     let ammo_s = ammo[0] + ammo[1]
 
     if (ammo_s == 0) {
@@ -57,14 +96,6 @@ function rec_shoot(/** @type {Array} */ ammo, /** @type {Array} */ known, /** @t
     tree.self = new Node(good)
     tree.shoot = new Node(1 - good)
 
-
-
-
-
-
-
-
-
     // rec_shoot(ammo, tree.self)
 
     // const index = myArray.indexOf(2);
@@ -89,11 +120,14 @@ function compute(data) {
     let action = {
         desc: "unknown"
     }
+
     let ammo_sum = ammo[0] + ammo[1]
     if (p1h == 0 || p2h == 0 || ammo_sum == 0) {
         action.desc = "error in data"
         return action
     }
+
+    let items = data.items
 
     console.log("live rounds: ", ammo[0], "/", ammo_sum)
     console.log("known: ", known)
@@ -120,11 +154,13 @@ function compute(data) {
 
     let ammo2 = [...ammo]
     let known2 = [...known]
+    let items2 = [...items]
 
-    let rec = rec_shoot(ammo2, known2, new Node(1))
+    // let rec = rec_shoot(ammo2, known2, new Node(1))
+    let actions = []
+    let solved = solve(ammo2, known2, items2, actions)
     console.log("------------------------------------")
-    console.log(JSON.stringify(rec, null, 4));
-
+    console.log(JSON.stringify(solved, null, 4));
     return action
 }
 
