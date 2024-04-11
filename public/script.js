@@ -79,8 +79,8 @@ function sendData() {
         // console.log(player_items.children[i].firstChild.innerText)
         items2.push(dealer_items.children[i].firstChild.innerText)
     }
-    console.log(items1)
-    console.log(items2)
+    // console.log(items1)
+    // console.log(items2)
 
     let payload = {
         health: health,
@@ -88,7 +88,7 @@ function sendData() {
         known: ammo,
         items: [items1, items2]
     }
-
+    console.log(payload)
     fetch('/updateGame', {
         method: 'POST',
         headers: {

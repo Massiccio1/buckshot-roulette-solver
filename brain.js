@@ -6,47 +6,101 @@ class Node {
     }
 }
 
+function permutator(inputArr) {
+    var results = [];
+
+    function permute(arr, memo) {
+        var cur, memo = memo || [];
+
+        for (var i = 0; i < arr.length; i++) {
+            cur = arr.splice(i, 1);
+            if (arr.length === 0) {
+                results.push(memo.concat(cur));
+            }
+            permute(arr.slice(), memo.concat(cur));
+            arr.splice(i, 0, cur[0]);
+        }
+
+        return results;
+    }
+
+    return permute(inputArr);
+}
+
+function adrenaline(main, extra, item) {
+
+    let toappend = []
+    let append_index = 0
+    let appendlist = []
+
+    let extraperm = permutator(extra)
+
+    for (let i = 0; i < main.length; i++) {
+        let extraperm2 = JSON.parse(JSON.stringify(extraperm));
+
+        for (let e = 0; e < extraperm2.length; e++) {
+            let tmp = [...main[i]]
+            for (let j = 0; j < tmp.length; j++) {
+                if (tmp[j] == item) {
+                    if (extraperm2[e].length == 0) {
+                        tmp.splice(j, 1);
+
+                        continue
+                    }
+                    console.log("before: ", tmp)
+                    //tmp[j] = extraperm2[e][0]
+                    tmp.splice(j + 1, 0, extraperm2[e][0]);
+                    extraperm2[e].shift()
+                    console.log("after: ", tmp)
+
+
+                }
+
+            }
+            appendlist.push(tmp)
+        }
+    }
+
+    return Array.from(new Set(appendlist.map(JSON.stringify))).map(JSON.parse);
+
+}
+
+function get_all_actions(player_items, dealer_items, swap_item = "adrenaline") {
+    if (dealer_items.length == 0) {
+        //dealer non ha items
+        while (player_items.indexOf(swap_item) !== -1) {
+            player_items.splice(player_items.indexOf(swap_item), 1);
+        }
+    }
+    let out = permutator(player_items)
+    let uniqueArr = Array.from(new Set(out.map(JSON.stringify))).map(JSON.parse);
+    console.log(uniqueArr)
+    if (dealer_items.length != 0) {
+        //dealer non ha items
+        uniqueArr = adrenaline(uniqueArr, dealer_items, swap_item)
+    }
+
+
+    return uniqueArr
+}
+
 
 function test() {
     console.log("in test function")
 }
 
-function play(ammo, items) {
-
+function play(health, ammo, known, perm) {
+    let next = -1
 }
 
-function solve(ammo, known, items, actions) {
-
-    let ammo_s = ammo[0] + ammo[1]
-
-    if (ammo_s == 0) {
-        actions.push(["no ammo left"])
-        return actions
-    }
-    //out of options
-    let ooo = false
-    while (!ooo) {
-
-    }
-
-    //
-    // if (known[0] == 0 || ammo[0] == 0) {
-    //     //se la prossima è blank o non ci sono live
-    //     let index = items[0].indexOf("inverter");
-    //     console.log("search inverter at: ", index)
-
-    //     if (index >= 0) {
-    //         actions.push("inverter")
-    //         actions.push("shoot")
-    //         items.splice(index, 1); // 2nd parameter means remove one item only
-    //         ammo[1]--
-    //         return actions
-    //     }
-
-
-
-    //     return actions
-    // }
+function solve(health, ammo, known, perm) {
+    let logs = []
+    if (perm.length > 0) {
+        for (let i = 0; i < perm.length; i++) {
+            let ammo2 = [...ammo]
+            console.log(ammo2)
+        }
+    } else { }
 
 }
 
@@ -131,36 +185,14 @@ function compute(data) {
 
     console.log("live rounds: ", ammo[0], "/", ammo_sum)
     console.log("known: ", known)
-    // if (known[0] == 0) {
-    //     action.verbose = "next is blank shell"
-    //     action.desc = "self"
-    //     return action
-    // }
-    // if (known[0] == 1) {
-    //     action.verbose = "next is live shell"
-    //     action.desc = "shoot"
-    //     return action
-    // }
-    // if (ammo[0] >= ammo_sum) {
-    //     action.verbose = "all live rounds, shoot"
-    //     action.desc = "shoot"
-    //     return action
-    // }
-    // if (ammo[1] == ammo_sum) {
-    //     action.verbose = "all blanks, self"
-    //     action.desc = "shoot self"
-    //     return action
-    // }
+    console.log("items: ", items)
 
-    let ammo2 = [...ammo]
-    let known2 = [...known]
-    let items2 = [...items]
+    let perm = get_all_actions(items[0], items[1], "adrenaline")
 
+    console.log("permutations: ", perm)
+    let out = solve(data.health, ammo, known, perm)
     // let rec = rec_shoot(ammo2, known2, new Node(1))
     let actions = []
-    let solved = solve(ammo2, known2, items2, actions)
-    console.log("------------------------------------")
-    console.log(JSON.stringify(solved, null, 4));
     return action
 }
 
