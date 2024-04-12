@@ -7,7 +7,6 @@ class Node {
 }
 
 
-
 function removeDuplicatesNestedList(nestedList) {
     const seen = new Set();
 
@@ -26,13 +25,11 @@ function removeDuplicatesNestedList(nestedList) {
 
 function RemoveAmmoKnown(cheatammo, known) {
     for (let i = 0; i < cheatammo.length; i++) {
-        // console.log(cheatammo[i])
         for (let j = 0; j < cheatammo[i].length; j++) {
             if (cheatammo[i][j] != known[j] && known[j] != -1) {
                 let tmp = cheatammo.splice(i, 1);
                 i--
-                // console.log("rimosso:", tmp)
-                // console.log(cheatammo[i + 1][j], " : ", known[j])
+
                 break
             }
         }
@@ -175,192 +172,53 @@ function odds(ammo, known) {
     return p
 
 }
-function oddsplus_wip(ammo_k, known_const) {
 
-    known = [...known_const]
-    ammo = [...ammo_k]
 
-    //0  blank, 1 live
-    let ammo_s = ammo[0] + ammo[1]
-
-    if (ammo_s == 0) {
-        return []
+function makeDecisionTree(item_perm, ammo, known, p2h = 4) {
+    let root = new Node()
+    root.desc = "root"
+    root.permutations = []
+    for (let i = 0; i < item_perm.length; i++) {
+        let tmp = new Node()
+        tmp.itemlist = item_perm[i]
+        root.permutations.push(tmp)
+        decisionTree(tmp, item_perm[i], ammo, known, p2h)
     }
 
-    //next shell known blank or no more live
-    if (ammo[0] == 0) {
-        known[0] = 0
-    }
-    //next shell known live or no more blanks
-    if (ammo[1] == 0) {
-        known[0] = 1
+    if (item_perm.length <= 0) {
+        let tmp = new Node()
+        tmp.itemlist = []
+        root.permutations.push(tmp)
+        decisionTree(tmp, [], ammo, known, p2h)
     }
 
-    let klive = 0
-    let kblank = 0
-
-    for (let i = 0; i < known.length; i++) {
-        if (known[i] == 0)
-            kblank++
-        if (known[i] == 1)
-            klive++
-    }
-
-    let ulive = ammo[0] - klive
-    let ublank = ammo[1] - kblank
-
-    if (ulive == 0)
-        known[0] = 0
-    if (ublank == 0)
-        known[0] = 1
-    let p = ulive / (ulive + ublank)
-    // console.log("odds: ", p)
-
-
-
-    return known
-
+    return root
 }
 
-
-function noitem(ammo, known, log) {
-    // console.log(log)
-    if (ammo[0] + ammo[1] == 0) {
-        log.push("end of round")
-        return
-    }
-
-    let p = odds(ammo, known)   //p live
-    log.push(p)
-    if (p != 1) { //puç essere blank
-        ammo[1]--
-        noitem(ammo, known.slice(1, known.lengt), log)
-    }
-}
-
-function cheatToAmmo(cheatammo) {
-    let ammo = [0, 0]
-    for (let i = 0; i < cheatammo.length; i++) {
-        if (cheatammo[i] == 0)
-            ammo[1]++
-        if (cheatammo[i] == 1)
-            ammo[0]++
-    }
-    return ammo
-}
-
-function extra(masterlog) {
-    for (let i = 1; i < masterlog.length; i++) {
-        let value = 0
-        for (let j = 1; j < masterlog[i].length; j++) {
-
+function crawlerMaster(dectree) {
+    console.log("crawling....")
+    let masterlog = []
+    for (let i = 0; i < dectree.permutations.length; i++) {
+        let current = dectree.permutations[i];
+        let indexes = []
+        if ("ss" in current)
+            indexes.push(current.ss)
+        if ("sd" in current)
+            indexes.push(current.sd)
+        if ("item" in current)
+            indexes.push(current.item)
+        console.log("indexes: ", indexes)
+        for (let j = 0; j < indexes.length; j++) {
+            console.log(indexes[j])
         }
     }
 
+    console.log("done crawling....")
+
+    return masterlog
 }
 
-function palyitem(item, cheatammo, known, log) {
-
-    let original_ammo = [...cheatammo]
-
-    let dmg = 0
-    let inverted = 0
-    let handcuff = 0
-    let saw = 0
-    let item_index = 0
-    let used = []
-
-    // item = item[0]
-    // console.log(item)
-    for (let i = 0; i < item.length; i++) {
-
-        switch (item[i]) {
-            case 'inverter':
-                let ammo = cheatToAmmo(cheatammo)
-                let p = odds(ammo, known)
-                if (p == 0 || p == 1)
-                    known[0] = p
-                cheatammo[0] = 1 - cheatammo[0]
-                if (known[0] != -1)
-                    known[0] = 1 - known[0]
-
-                break;
-            case 'saw':
-                saw = 1
-                break;
-            case 'beer':
-                cheatammo.shift()
-                known.shift()
-                break;
-            case 'glass':
-                known[0] = cheatammo[0]
-                break;
-            case 'handcuffs':
-                handcuff = 1
-                break;
-            default:
-                console.log("unknown item: ", item[i])
-        }
-
-    }
-
-    let ammo = cheatToAmmo(cheatammo)
-
-    let ex = false
-    log.push(`${item}`)
-    log.push(original_ammo)
-    while (!ex) {
-        // console.log("iter")
-        if (ammo[0] + ammo[1] <= 0) {
-            ex = true
-            continue
-        }
-
-        let p = odds(ammo, known)
-        if (p == 0 || p == 1) {
-            known[0] = p
-        }
-        log.push(p) //% live round
-        if (p == 1) {
-            ammo[0]--
-            known.shift()
-            cheatammo.shift()
-            dmg++
-            if (saw)
-                dmg++
-        }
-        if (p == 0) { //if blank    live, you can shot yourself
-            ammo[1]--
-            known.shift()
-            cheatammo.shift()
-        } else
-            if (handcuff) {
-                handcuff = 0
-                if (cheatammo[0] == 1) {
-                    dmg++
-                    if (saw)
-                        dmg++
-                }
-                known.shift()
-                cheatammo.shift()
-                ammo = cheatToAmmo(cheatammo)
-            } else {
-                ex = true
-            }
-        saw = 0
-    }
-
-    ammo = cheatToAmmo(cheatammo)
-    log.push(`damage: ${dmg}`)
-    if (ammo[1] + ammo[0] <= 1) {
-        log.push("end of round")
-
-    }
-
-    return log
-}
-
-function decisionTree(log, items, ammo, known, p2h = 4, damage = 0, sawmult = 1, handcuff = 0) {
+function decisionTree(log, items, ammo, known, p2h = 4, damage = 0, handcuff = 0, sawmult = 1) {
 
 
     console.log("in decision tree")
@@ -380,15 +238,18 @@ function decisionTree(log, items, ammo, known, p2h = 4, damage = 0, sawmult = 1,
     let l = p != 0 ? 1 : 0
     let b = p != 1 ? 1 : 0
 
-    console.log(p)
-
     log.plive = p
 
+    //change to this if you want to allow shooting yourself even if not 100% blank
+    // if (p != 1) {
     //ss
-    if (p != 1) {
+    if (p == 0) {
         log.ss = new Node()
         //ssl
         if (p != 0) {
+
+
+
             let items2 = [...items]
             let ammo2 = [...ammo]
             let known2 = [...known]
@@ -396,6 +257,12 @@ function decisionTree(log, items, ammo, known, p2h = 4, damage = 0, sawmult = 1,
             known2.shift()
             let ssl = log.ss.l = new Node()
             ssl.damage = damage - sawmult
+            //had 1 shot, now 0
+            if (ammo_s == 1) {
+                ssl.info = "shotgun emtpy"
+            } else if (handcuff) {
+                decisionTree(ssl, items2, ammo2, known2, p2h, damage - sawmult)
+            }
         }
         //ssb
         {
@@ -405,7 +272,11 @@ function decisionTree(log, items, ammo, known, p2h = 4, damage = 0, sawmult = 1,
             ammo2[1]--
             known2.shift()
             log.ss.b = new Node()
-            decisionTree(log.ss.b, items2, ammo2, known2, p2h, damage)
+            if (ammo_s == 1) {
+                log.ss.b.info = "shotgun emtpy"
+                log.ss.b.damage = damage
+            }
+            decisionTree(log.ss.b, items2, ammo2, known2, p2h, damage, handcuff)
         }
 
     }
@@ -421,6 +292,11 @@ function decisionTree(log, items, ammo, known, p2h = 4, damage = 0, sawmult = 1,
             known2.shift()
             let sdl = log.sd.l = new Node()
             sdl.damage = damage + sawmult
+            if (ammo_s == 1) {
+                sdl.info = "shotgun emtpy"
+            } else if (handcuff) {
+                decisionTree(sdl, items2, ammo2, known2, p2h, damage + sawmult)
+            }
         }
         //sdb
         if (p != 1) {
@@ -431,6 +307,11 @@ function decisionTree(log, items, ammo, known, p2h = 4, damage = 0, sawmult = 1,
             known2.shift()
             let sdb = log.sd.b = new Node()
             sdb.damage = damage
+            if (ammo_s == 1) {
+                sdb.info = "shotgun emtpy"
+            } else if (handcuff) {
+                decisionTree(sdb, items2, ammo2, known2, p2h, damage)
+            }
         }
 
 
@@ -442,8 +323,14 @@ function decisionTree(log, items, ammo, known, p2h = 4, damage = 0, sawmult = 1,
 
         log.item = new Node()
 
-        let sawmult = 1
-        let handcuff = 0
+        let sawmult2 = sawmult
+        let handcuff2 = handcuff
+
+
+        if (items[0] == "adrenaline") {
+            log.item.desc = items[1]
+        }
+        else log.item.desc = items[0]
 
 
         if (p != 0) {
@@ -455,35 +342,38 @@ function decisionTree(log, items, ammo, known, p2h = 4, damage = 0, sawmult = 1,
             let ammo2 = [...ammo]
             let known2 = [...known]
 
-            if (items2[i] == "adrenaline") {
+            if (items2[0] == "adrenaline") {
                 log.item.note = "adrenaline"
                 items2.shift()
+
             }
 
-            switch (items2[i]) {
+            switch (items2[0]) {
                 case 'inverter':
                     ammo2[0]--
                     ammo2[1]++
+                    if (known2[0] == 1 || known2[0] == 0)
+                        known2[0] = 1 - known2[0]
                     break;
                 case 'saw':
-                    sawmult = 2
+                    sawmult2 = 2
                     break;
                 case 'beer':
-                    ammo[0]--
+                    ammo2[0]--
                     known2.shift()
                     break;
                 case 'glass':
                     known2[0] = 1
                     break;
                 case 'handcuffs':
-                    handcuff = 1
+                    handcuff2 = 1
                     break;
                 default:
-                    console.log("unknown item: ", item2[i])
+                    console.log("unknown item: ", items2[0])
             }
 
             items2.shift()
-            decisionTree(il, items2, ammo2, known2, p2h, damage, sawmult, handcuff)
+            decisionTree(il, items2, ammo2, known2, p2h, damage, handcuff2, sawmult2)
 
         }
         if (p != 1) {
@@ -495,35 +385,38 @@ function decisionTree(log, items, ammo, known, p2h = 4, damage = 0, sawmult = 1,
             let ammo2 = [...ammo]
             let known2 = [...known]
 
-            if (items2[i] == "adrenaline") {
+            if (items2[0] == "adrenaline") {
                 log.item.note = "adrenaline"
                 items2.shift()
+
             }
 
-            switch (items2[i]) {
+            switch (items2[0]) {
                 case 'inverter':
                     ammo2[0]++
                     ammo2[1]--
+                    if (known2[0] == 1 || known2[0] == 0)
+                        known2[0] = 1 - known2[0]
                     break;
                 case 'saw':
                     sawmult = 2
                     break;
                 case 'beer':
-                    ammo[1]--
+                    ammo2[1]--
                     known2.shift()
                     break;
                 case 'glass':
                     known2[0] = 0
                     break;
                 case 'handcuffs':
-                    handcuff = 1
+                    handcuff2 = 1
                     break;
                 default:
-                    console.log("unknown item: ", item2[i])
+                    console.log("unknown item: ", items2[0])
             }
 
             items2.shift()
-            decisionTree(ib, items2, ammo2, known2, p2h, damage, sawmult, handcuff)
+            decisionTree(ib, items2, ammo2, known2, p2h, damage, handcuff2, sawmult2)
         }
     }
 
@@ -532,46 +425,6 @@ function decisionTree(log, items, ammo, known, p2h = 4, damage = 0, sawmult = 1,
     console.log("end of decision tree")
     return log
 }
-
-function solve2(perm, cheatammo, ammo, known) {
-    let masterlog = []
-    let ammo2 = [...ammo]
-
-    let log = []
-    noitem(ammo2, known, log)
-    masterlog.push(log)
-
-    //i perm items, j perm bullet
-
-    for (let i = 0; i < perm.length; i++) {
-        for (let k = 0; k < perm[i].length; k++) {
-
-            for (let j = 0; j < cheatammo.length; j++) {
-                let actions = ["ss", "sd", "item"]
-
-                // for (let k = 0; k < perm[i].length; k++) {
-                let cheatammo2 = [...cheatammo[j]]
-                let perm2 = [...perm[i]]
-                perm2 = perm2.slice(0, k + 1)
-                let known2 = [...known]
-                //ora uso cheatammo2, current state
-                log = []
-                palyitem(perm2, cheatammo2, known2, log)
-                masterlog.push(log)
-            }
-
-        }
-    }
-    console.log("done calculating")
-
-    let ex = extra(masterlog)
-    console.log("done calculating")
-
-    return masterlog
-}
-
-
-
 
 function compute(data) {
     let p1h = data.health[0]
@@ -620,11 +473,11 @@ function compute(data) {
     // let out = solve(data.health, ammo, known, perm)
     // let rec = rec_shoot(ammo2, known2, new Node(1))
     // let out = solve2(perm, cheatammo, ammo, known)
-    let root = new Node()
-    root.desc = "root"
-    root.items = perm[0]
-    let out = decisionTree(root, perm[0], ammo, known, p2h)
-    let actions = []
+
+    let out = makeDecisionTree(perm, ammo, known, p2h)
+    console.log("-----------------------------------------------------")
+    let crwl = crawlerMaster(out)
+    out.crawloutput = crwl
     return out
 }
 
