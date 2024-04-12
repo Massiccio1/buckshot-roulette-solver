@@ -131,6 +131,7 @@ function addTask() {
     const listItem = document.createElement("li");
 
     // Create a task text element
+    // Create a task text element
     const taskTextElement = document.createElement("span");
     taskTextElement.innerText = taskText;
 
