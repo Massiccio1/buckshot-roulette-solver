@@ -54,13 +54,14 @@ function sendData() {
 
     const weapons = document.querySelectorAll('.weapon');
     let ammo = []
-    weapons.forEach(item => {
-        if (item.style.backgroundColor === "darkred")
+    for (let j = 0; j < weapons.length; j++) {
+        if (weapons[j].style.backgroundColor === "darkred")
             ammo.push(1);
-        else if (item.style.backgroundColor === "darkslateblue")
+        else if (weapons[j].style.backgroundColor === "darkslateblue")
             ammo.push(0);
         else ammo.push(-1)
-    });
+    }
+
 
     const live = document.getElementById('numberlive');
     const blank = document.getElementById('numberblank');
@@ -85,7 +86,8 @@ function sendData() {
     let payload = {
         health: health,
         ammo: [live.valueAsNumber, blank.valueAsNumber],
-        known: ammo,
+        known: ammo.slice(0, 8),
+        current: ammo.slice(8, ammo.length),
         items: [items1, items2]
     }
     console.log(payload)
@@ -102,7 +104,8 @@ function sendData() {
             throw new Error('Failed to update dat');
         }
     }).then(data => {
-        document.getElementById('responseArea').value = JSON.stringify(data, null); // Display response in textarea
+        console.log(data)
+        document.getElementById('responseArea').value = JSON.stringify(data, null, 1); // Display response in textarea
     }).catch(error => {
         console.error('Error:', error);
     });

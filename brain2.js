@@ -1,8 +1,4 @@
 
-
-
-
-
 function removeDuplicatesNestedList(nestedList) {
     const seen = new Set();
 
@@ -33,8 +29,21 @@ function RemoveAmmoKnown(cheatammo, known) {
         }
     }
 
-
     return cheatammo
+}
+
+function addsssd(perm, cheatammo) {
+    let ammo = cheatToAmmo(cheatammo[0])
+    for (let i = 0; i < perm.length; i++) {
+        let count = 1
+        for (let j = 0; j < perm[i].length; j++) {
+            if (perrm[i][j] == "handcuffs")
+                count++
+        }
+        for (let j = 0; j < ammo[1].length; j++) {
+            perm[i].push("ss")
+        }
+    }
 }
 
 function permammo(ammo) {
@@ -118,6 +127,8 @@ function get_all_actions(player_items, dealer_items, swap_item = "adrenaline") {
             player_items.splice(player_items.indexOf(swap_item), 1);
         }
     }
+
+
     let out = permutator(player_items)
     let uniqueArr = Array.from(new Set(out.map(JSON.stringify))).map(JSON.parse);
     console.log(uniqueArr)
@@ -309,36 +320,6 @@ function palyitem(item, cheatammo, known, log) {
     return log
 }
 
-function decisionTree(items, ammo, known) {
-    let items2 = [...items]
-    let ammo2 = [...ammo]
-    let known2 = [...known]
-
-    let masterlog = []
-
-    let actions = ["ss", "sd", "item"]
-    let ammo_s = ammo[0] + ammo[1]
-    let p = odds(ammo, known)
-    if (p == 0 || p == 1) {
-        known[0] = p
-    }
-
-    let ssl = []
-    let ssb = []
-    //ss
-    if (p == 1) {
-        //don't shoot yourself
-        ssl = []
-    } else {
-        //assume is live, you shot yourself
-        ammo[0]--
-        known.shift()
-    }
-
-
-
-}
-
 function solve2(perm, cheatammo, ammo, known) {
     let masterlog = []
     let ammo2 = [...ammo]
@@ -353,7 +334,7 @@ function solve2(perm, cheatammo, ammo, known) {
         for (let k = 0; k < perm[i].length; k++) {
 
             for (let j = 0; j < cheatammo.length; j++) {
-                let actions = ["ss", "sd", "item"]
+
 
                 // for (let k = 0; k < perm[i].length; k++) {
                 let cheatammo2 = [...cheatammo[j]]
@@ -384,24 +365,11 @@ function compute(data) {
     let p2h = data.health[1]
     /** @type {Array} */
     let ammo = data.ammo
-    let current = data.current
     /** @type {Array} */
     let known = data.known
     let action = {
         desc: "unknown"
     }
-
-    for (let i = 0; i < current.length; i++) {
-        if (current[i] == 0) {
-            ammo[1]--
-            known.shift()
-        }
-        if (current[i] == 1) {
-            ammo[0]--
-            known.shift()
-        }
-    }
-
 
     let ammo_sum = ammo[0] + ammo[1]
     if (p1h == 0 || p2h == 0 || ammo_sum == 0) {
@@ -409,7 +377,7 @@ function compute(data) {
         return action
     }
 
-    let cheatammo = permammo(ammo)
+    let cheatammo = permammo(data.ammo)
     RemoveAmmoKnown(cheatammo, known)
     // console.log(cheatammo)
     // return cheatammo
@@ -417,7 +385,6 @@ function compute(data) {
 
     console.log("live rounds: ", ammo[0], "/", ammo_sum)
     console.log("known: ", known)
-    console.log("current: ", current)
     console.log("items: ", items)
 
     let perm = get_all_actions(items[0], items[1], "adrenaline")
