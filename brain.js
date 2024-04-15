@@ -77,6 +77,21 @@ function permutator(inputArr) {
     return permute(inputArr);
 }
 
+function deepcomp(a, b, depth) {
+    let eq = true
+
+    let dp = Math.min(depth, a.length)
+    dp = Math.min(dp, b.length)
+
+    for (let i = 0; i < dp; i++) {
+        if (a[i] != b[i]) {
+            console.log("diff in:", a[i], " e ", b[i])
+            return false
+        }
+    }
+    return eq
+}
+
 function adrenaline(main, extra, item) {
 
     let toappend = []
@@ -209,87 +224,13 @@ function crawlerMaster(dectree) {
 
     console.log("done crawling....")
 
-    console.log(masterlog[0])
+    // console.log(masterlog[0])
 
-    console.log(dectree.permutations[3][masterlog[3][0]][masterlog[3][1]])
+    // console.log(dectree.permutations[0][masterlog[0][0]][masterlog[0][1]])
 
     return masterlog
 }
 
-function crawlerWorker(current, log) {
-    let isleaf = false
-    let info = "no info"
-    let damage = 0
-    let indexes = []
-    let names = []
-    let decisive = false
-    let best = -2
-    let worst = -2
-    let win = false
-    let plive = 1
-    if ("win" in current) {
-        win = current.win
-    }
-    if ("pval" in current) {
-        pval = current.pval
-    }
-    if ("damage" in current) {
-        damage = current.damage
-    }
-    if ("end" in current) {
-        isleaf = true
-        end = current.end
-    }
-    if ("ss" in current) {
-        indexes.push(current.ss)
-        names.push("ss")
-    }
-    if ("sd" in current) {
-        indexes.push(current.sd)
-        names.push("sd")
-    }
-    if ("item" in current) {
-        indexes.push(current.item)
-        names.push("item")
-    }
-    if ("l" in current) {
-        indexes.push(current.l)
-        names.push("l")
-    }
-    if ("b" in current) {
-        indexes.push(current.b)
-        names.push("b")
-    }
-
-    // if ("damage" in current)
-    //     maxdmg = current.damage
-    // if ("info" in current)
-    //     info = current.info
-
-    // console.log("inner crawler l:", indexes.length)
-    // console.log(indexes)
-    let bwv = [-100, 100, -100]
-    for (let i = 0; i < indexes.length; i++) {
-        let [best, worst, value] = crawlerWorker(indexes[i], log)
-        bwv[0] = Math.max(best, bwv[0])
-        bwv[1] = Math.min(worst, bwv[1])
-        bwv[2] = Math.max(value, bwv[2])
-    }
-    if (indexes.length == 0)
-        isleaf = true
-    if (isleaf) {
-
-        let value = 0
-        if (win) value = 100
-        if (damage <= 0) value -= damage * 2
-        value += damage
-        console.log("found leaf with value: ", value)
-        return [value, value, value]
-
-    }
-    console.log(bwv)
-    return bwv
-}
 
 function crawlerWorker2(current, masterlog, tmplog) {
     console.log("in branch: ", tmplog)
@@ -298,6 +239,7 @@ function crawlerWorker2(current, masterlog, tmplog) {
     let damage = 0
     let indexes = []
     let names = []
+    let end = false
     if ("win" in current) {
         win = current.win
     }
@@ -344,7 +286,14 @@ function crawlerWorker2(current, masterlog, tmplog) {
     if (indexes.length == 0)
         isleaf = true
     if (isleaf) {
-        tmplog.push(damage)
+
+        let value = 0
+        if (win) value = 10
+        if (damage <= 0) value -= damage * 2
+        if (end) value++
+        value += damage * 2
+        console.log("found leaf with value: ", value)
+        tmplog.push(value)
         console.log("found leaf")
         // console.log(tmplog)
         masterlog.push(tmplog)
@@ -352,16 +301,24 @@ function crawlerWorker2(current, masterlog, tmplog) {
 
     return masterlog
 }
-function decisionTree(log, items, ammo, known, p2h, damage = 0, handcuff = 0, sawmult = 1) {
+
+function extra(masterlog) {
+    for (let i = 0; i < masterlog.length; i++) {
+
+    }
+}
+function decisionTree(log, items, ammo, known, p2h, damage = 0, handcuff = 0, sawmult = 1, nextammo = -1) {
 
 
     console.log("in decision tree")
+    console.log(handcuff)
 
     let actions = ["ss", "sd", "item"]
     let ammo_s = ammo[0] + ammo[1]
     console.log(p2h)
     if (p2h <= 0) {
         log.win = true
+        return log
     }
 
     if (ammo_s <= 0) {
@@ -384,7 +341,7 @@ function decisionTree(log, items, ammo, known, p2h, damage = 0, handcuff = 0, sa
     if (p == 0) {
         log.ss = new Node()
         //ssl
-        if (p != 0) {
+        if (p != 0 && nextammo != 0) {
 
 
 
@@ -407,7 +364,7 @@ function decisionTree(log, items, ammo, known, p2h, damage = 0, handcuff = 0, sa
             }
         }
         //ssb
-        {
+        if (nextammo != 1) {
             let items2 = [...items]
             let ammo2 = [...ammo]
             let known2 = [...known]
@@ -427,7 +384,7 @@ function decisionTree(log, items, ammo, known, p2h, damage = 0, handcuff = 0, sa
     if (p != 0) {
         log.sd = new Node()
         //sdl
-        {
+        if (nextammo != 0) {
             let items2 = [...items]
             let ammo2 = [...ammo]
             let known2 = [...known]
@@ -449,7 +406,7 @@ function decisionTree(log, items, ammo, known, p2h, damage = 0, handcuff = 0, sa
             }
         }
         //sdb
-        if (p != 1) {
+        if (p != 1 && nextammo != 1) {
             let items2 = [...items]
             let ammo2 = [...ammo]
             let known2 = [...known]
@@ -478,13 +435,14 @@ function decisionTree(log, items, ammo, known, p2h, damage = 0, handcuff = 0, sa
         let handcuff2 = handcuff
 
 
+
         if (items[0] == "adrenaline") {
             log.item.desc = items[1]
         }
         else log.item.desc = items[0]
 
 
-        if (p != 0) {
+        if (p != 0 && nextammo != 0) {
             //live
             let il = log.item.l = new Node()
 
@@ -492,7 +450,7 @@ function decisionTree(log, items, ammo, known, p2h, damage = 0, handcuff = 0, sa
             let items2 = [...items]
             let ammo2 = [...ammo]
             let known2 = [...known]
-
+            let nextammo2 = -1
             if (items2[0] == "adrenaline") {
                 log.item.note = "adrenaline"
                 items2.shift()
@@ -508,6 +466,7 @@ function decisionTree(log, items, ammo, known, p2h, damage = 0, handcuff = 0, sa
                     break;
                 case 'saw':
                     sawmult2 = 2
+                    nextammo2 = 1
                     break;
                 case 'beer':
                     ammo2[0]--
@@ -518,16 +477,22 @@ function decisionTree(log, items, ammo, known, p2h, damage = 0, handcuff = 0, sa
                     break;
                 case 'handcuffs':
                     handcuff2 = 1
+                    nextammo2 = 1
                     break;
                 default:
                     console.log("unknown item: ", items2[0])
             }
 
             items2.shift()
-            decisionTree(il, items2, ammo2, known2, p2h, damage, handcuff2, sawmult2)
+            let ammo_s = ammo2[0] + ammo2[1]
+            if (ammo_s == 1) {
+                il.info = "shotgun emtpy"
+                il.end = true
+            }
+            decisionTree(il, items2, ammo2, known2, p2h, damage, handcuff2, sawmult2, nextammo2)
 
         }
-        if (p != 1) {
+        if (p != 1 && nextammo != 1) {
             //blank
             let ib = log.item.b = new Node()
 
@@ -535,6 +500,7 @@ function decisionTree(log, items, ammo, known, p2h, damage = 0, handcuff = 0, sa
             let items2 = [...items]
             let ammo2 = [...ammo]
             let known2 = [...known]
+            let nextammo2 = -1
 
             if (items2[0] == "adrenaline") {
                 log.item.note = "adrenaline"
@@ -551,6 +517,7 @@ function decisionTree(log, items, ammo, known, p2h, damage = 0, handcuff = 0, sa
                     break;
                 case 'saw':
                     sawmult = 2
+                    nextammo2 = 0
                     break;
                 case 'beer':
                     ammo2[1]--
@@ -561,13 +528,19 @@ function decisionTree(log, items, ammo, known, p2h, damage = 0, handcuff = 0, sa
                     break;
                 case 'handcuffs':
                     handcuff2 = 1
+                    nextammo2 = 0
                     break;
                 default:
                     console.log("unknown item: ", items2[0])
             }
 
             items2.shift()
-            decisionTree(ib, items2, ammo2, known2, p2h, damage, handcuff2, sawmult2)
+            let ammo_s = ammo2[0] + ammo2[1]
+            if (ammo_s == 1) {
+                ib.info = "shotgun emtpy"
+                ib.end = true
+            }
+            decisionTree(ib, items2, ammo2, known2, p2h, damage, handcuff2, sawmult2, nextammo2)
         }
     }
 
@@ -629,6 +602,8 @@ function compute(data) {
     console.log("-----------------------------------------------------")
     let crwl = crawlerMaster(out)
     out.crawloutput = crwl
+    // return crwl
+
     return out
 }
 
