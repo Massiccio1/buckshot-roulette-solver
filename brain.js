@@ -203,20 +203,26 @@ function crawlerMaster(dectree) {
         let current = dectree.permutations[i];
         let log = []
 
-        masterlog.push(crawlerWorker(current))
+        // masterlog.push(crawlerWorker(current))
+        crawlerWorker2(current, masterlog, [])
     }
 
     console.log("done crawling....")
+
+    console.log(masterlog[0])
+
+    console.log(dectree.permutations[3][masterlog[3][0]][masterlog[3][1]])
 
     return masterlog
 }
 
 function crawlerWorker(current, log) {
-    let isleaf = 0
+    let isleaf = false
     let info = "no info"
     let damage = 0
     let indexes = []
     let names = []
+    let decisive = false
     let best = -2
     let worst = -2
     let win = false
@@ -283,6 +289,68 @@ function crawlerWorker(current, log) {
     }
     console.log(bwv)
     return bwv
+}
+
+function crawlerWorker2(current, masterlog, tmplog) {
+    console.log("in branch: ", tmplog)
+    let isleaf = false
+    let win = false
+    let damage = 0
+    let indexes = []
+    let names = []
+    if ("win" in current) {
+        win = current.win
+    }
+    if ("damage" in current) {
+        damage = current.damage
+    }
+    if ("end" in current) {
+        isleaf = true
+        end = current.end
+    }
+    if ("ss" in current) {
+        indexes.push(current.ss)
+        names.push("ss")
+    }
+    if ("sd" in current) {
+        indexes.push(current.sd)
+        names.push("sd")
+    }
+    if ("item" in current) {
+        indexes.push(current.item)
+        names.push("item")
+    }
+    if ("l" in current) {
+        indexes.push(current.l)
+        names.push("l")
+    }
+    if ("b" in current) {
+        indexes.push(current.b)
+        names.push("b")
+    }
+
+    for (let i = 0; i < indexes.length; i++) {
+        let tmptmp = [...tmplog] //branch clone
+        tmptmp.push(names[i])
+        if (names[i] == "item") {
+            if ("note" in indexes[i]) {
+                tmptmp.push("adrenaline")
+            }
+            tmptmp.push(indexes[i].desc)
+        }
+
+        crawlerWorker2(indexes[i], masterlog, tmptmp)
+    }
+    if (indexes.length == 0)
+        isleaf = true
+    if (isleaf) {
+        tmplog.push(damage)
+        console.log("found leaf")
+        // console.log(tmplog)
+        masterlog.push(tmplog)
+    }
+
+    return masterlog
 }
 function decisionTree(log, items, ammo, known, p2h, damage = 0, handcuff = 0, sawmult = 1) {
 
