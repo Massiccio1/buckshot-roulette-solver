@@ -487,21 +487,21 @@ function evalBranch(current) {
     }
 
     if (indexes.length > 0) {
-        let value = 0
-        let valuename = ""
+
 
         for (let i = 0; i < indexes.length; i++) {
             let ret = evalBranch(indexes[i])
             values.push(ret)
         }
 
-
+        let value = values[0][0]
+        let valuename = names[0][1]
 
         if (choice) {
             //prendo la scelta con value più alta
             for (let i = 0; i < values.length; i++) {
 
-                if (values[i][0] < value) {
+                if (values[i][0] > value) {
                     value = values[i][0]
                     valuename = names[i]
                 }
