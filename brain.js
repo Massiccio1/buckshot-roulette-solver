@@ -79,13 +79,36 @@ function permutator(inputArr) {
 
 function deepcomp(a, b, depth) {
     let eq = true
+    if (depth === undefined) {
+        depth = a.length
+    }
 
     let dp = Math.min(depth, a.length)
     dp = Math.min(dp, b.length)
 
     for (let i = 0; i < dp; i++) {
         if (a[i] != b[i]) {
-            console.log("diff in:", a[i], " e ", b[i])
+            // console.log("diff in:", a[i], " e ", b[i])
+            return false
+        }
+    }
+    return eq
+}
+
+function deepcomp2(a, b, depth) {
+    let eq = true
+    if (depth === undefined) {
+        depth = a.length
+    }
+    if (a.length != b.length)
+        return false
+    if (a.length == 0 || b.length == 0)
+        return false
+
+
+    for (let i = 0; i < depth; i++) {
+        if (a[i] != b[i]) {
+            // console.log("diff in:", a[i], " e ", b[i])
             return false
         }
     }
@@ -137,7 +160,7 @@ function get_all_actions(player_items, dealer_items, swap_item = "adrenaline") {
     }
     let out = permutator(player_items)
     let uniqueArr = Array.from(new Set(out.map(JSON.stringify))).map(JSON.parse);
-    console.log(uniqueArr)
+    // console.log(uniqueArr)
     if (dealer_items.length != 0) {
         //dealer non ha items
         uniqueArr = adrenaline(uniqueArr, dealer_items, swap_item)
@@ -224,7 +247,27 @@ function crawlerMaster(dectree) {
 
     console.log("done crawling....")
 
-    // console.log(masterlog[0])
+    console.log(masterlog)
+
+    // console.log(dectree.permutations[0][masterlog[0][0]][masterlog[0][1]])
+
+    return masterlog
+}
+function evalMaster(dectree) {
+    console.log("evaluating branches....")
+    let masterlog = []
+    console.log("shallow branches: ", dectree.permutations.length)
+    for (let i = 0; i < dectree.permutations.length; i++) {
+        let current = dectree.permutations[i];
+        let log = []
+
+        // masterlog.push(crawlerWorker(current))
+        masterlog.push(evalBranch(current))
+    }
+
+    console.log("done evaluating....")
+
+    console.log(masterlog)
 
     // console.log(dectree.permutations[0][masterlog[0][0]][masterlog[0][1]])
 
@@ -233,7 +276,7 @@ function crawlerMaster(dectree) {
 
 
 function crawlerWorker2(current, masterlog, tmplog) {
-    console.log("in branch: ", tmplog)
+    // console.log("in branch: ", tmplog)
     let isleaf = false
     let win = false
     let damage = 0
@@ -286,15 +329,83 @@ function crawlerWorker2(current, masterlog, tmplog) {
     if (indexes.length == 0)
         isleaf = true
     if (isleaf) {
-
         let value = 0
         if (win) value = 10
         if (damage <= 0) value -= damage * 2
         if (end) value++
         value += damage * 2
-        console.log("found leaf with value: ", value)
+        // console.log("found leaf with value: ", value)
         tmplog.push(value)
-        console.log("found leaf")
+        // console.log("found leaf")
+        // console.log(tmplog)
+        masterlog.push(tmplog)
+    }
+
+    return masterlog
+}
+
+function crawlerWorker3(current, masterlog, tmplog) {
+    // console.log("in branch: ", tmplog)
+    let isleaf = false
+    let win = false
+    let damage = 0
+    let indexes = []
+    let names = []
+    let end = false
+    if ("win" in current) {
+        win = current.win
+    }
+    if ("damage" in current) {
+        damage = current.damage
+    }
+    if ("end" in current) {
+        isleaf = true
+        end = current.end
+    }
+    if ("ss" in current) {
+        indexes.push(current.ss)
+        names.push("ss")
+    }
+    if ("sd" in current) {
+        indexes.push(current.sd)
+        names.push("sd")
+    }
+    if ("item" in current) {
+        indexes.push(current.item)
+        names.push("item")
+    }
+    if ("l" in current) {
+        indexes.push(current.l)
+        names.push("l")
+    }
+    if ("b" in current) {
+        indexes.push(current.b)
+        names.push("b")
+    }
+
+    for (let i = 0; i < indexes.length; i++) {
+        let tmptmp = [...tmplog] //branch clone
+        tmptmp.push(names[i])
+        if (names[i] == "item") {
+            if ("note" in indexes[i]) {
+                tmptmp.push("adrenaline")
+            }
+            tmptmp.push(indexes[i].desc)
+        }
+
+        crawlerWorker2(indexes[i], masterlog, tmptmp)
+    }
+    if (indexes.length == 0)
+        isleaf = true
+    if (isleaf) {
+        let value = 0
+        if (win) value = 10
+        if (damage <= 0) value -= damage * 2
+        if (end) value++
+        value += damage * 2
+        // console.log("found leaf with value: ", value)
+        tmplog.push(value)
+        // console.log("found leaf")
         // console.log(tmplog)
         masterlog.push(tmplog)
     }
@@ -303,19 +414,130 @@ function crawlerWorker2(current, masterlog, tmplog) {
 }
 
 function extra(masterlog) {
+    console.log("TODO EXTRA")
     for (let i = 0; i < masterlog.length; i++) {
 
     }
 }
+
+
+function evalBranch(current) {
+    let isleaf = false
+    let win = false
+    let damage = 0
+    let indexes = []
+    let names = []
+    let end = false
+    let pval = 0.5
+    let choice = false
+    let forced = false
+    let values = []
+
+
+    /*
+    choice if:
+    ss
+    sd
+    item
+
+    forced if:
+    l
+    b
+
+    mutually exclusive
+    */
+
+    if ("win" in current) {
+        win = current.win
+    }
+    if ("damage" in current) {
+        damage = current.damage
+    }
+    if ("pval" in current) {
+        pval = current.pval
+    }
+    if ("end" in current) {
+        isleaf = true
+        end = current.end
+    }
+    if ("ss" in current) {
+        indexes.push(current.ss)
+        names.push("ss")
+        choice = true
+    }
+    if ("sd" in current) {
+        indexes.push(current.sd)
+        names.push("sd")
+        choice = true
+    }
+    if ("item" in current) {
+        indexes.push(current.item)
+        names.push("item")
+        choice = true
+    }
+    if ("l" in current) {
+        indexes.push(current.l)
+        names.push("l")
+        forced = true
+    }
+    if ("b" in current) {
+        indexes.push(current.b)
+        names.push("b")
+        forced = true
+    }
+
+    if (indexes.length > 0) {
+        let value = 0
+        let valuename = ""
+
+        for (let i = 0; i < indexes.length; i++) {
+            let ret = evalBranch(indexes[i])
+            values.push(ret)
+        }
+
+
+
+        if (choice) {
+            //prendo la scelta con value più alta
+            for (let i = 0; i < values.length; i++) {
+
+                if (values[i][0] < value) {
+                    value = values[i][0]
+                    valuename = names[i]
+                }
+            }
+        }
+        if (forced) {
+            for (let i = 0; i < values.length; i++) {
+                if (values[i][0] < value) {
+                    value = values[i][0]
+                    valuename = names[i]
+                }
+            }
+        }
+
+        return [value, valuename]
+    } else {
+        let value = 0
+        if (win) value = 10
+        if (damage <= 0) value -= damage * 2
+        if (end) value++
+        value += damage * 2
+        return [value, "eob"]
+    }
+}
+
+
+
 function decisionTree(log, items, ammo, known, p2h, damage = 0, handcuff = 0, sawmult = 1, nextammo = -1) {
 
 
-    console.log("in decision tree")
-    console.log(handcuff)
+    // console.log("in decision tree")
+    // console.log(handcuff)
 
     let actions = ["ss", "sd", "item"]
     let ammo_s = ammo[0] + ammo[1]
-    console.log(p2h)
+    // console.log(p2h)
     if (p2h <= 0) {
         log.win = true
         return log
@@ -546,7 +768,7 @@ function decisionTree(log, items, ammo, known, p2h, damage = 0, handcuff = 0, sa
 
 
 
-    console.log("end of decision tree")
+    // console.log("end of decision tree")
     return log
 }
 
@@ -600,9 +822,13 @@ function compute(data) {
 
     let out = makeDecisionTree(perm, ammo, known, p2h)
     console.log("-----------------------------------------------------")
-    let crwl = crawlerMaster(out)
-    out.crawloutput = crwl
+
+    // let crwl = crawlerMaster(out)
+    // out.crawloutput = crwl
     // return crwl
+
+    let ricBranch = evalMaster(out)
+    out.values = ricBranch
 
     return out
 }
