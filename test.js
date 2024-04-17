@@ -1,14 +1,11 @@
-function a1() {
-    return 1
+function a1(a, b) {
+    console.log("in a1: ", a, b)
 }
 function a2() {
     return [1, 3, 5, 7, 9]
 }
 
 
-console.log(a1())
-console.log(a2())
+let r1 = a1(b = 11, a = 22)
 
-let [a, b] = a2()
-
-console.log(a, b)
+console.log(r1)
