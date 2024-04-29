@@ -414,6 +414,11 @@ function evalBranch(current) {
         names.push("b")
         forced = true
     }
+    if ("ff" in current) {
+        indexes.push(current.ff)
+        names.push("ff")
+        forced = false
+    }
 
     // console.log("indexes:", indexes)
 
@@ -625,6 +630,56 @@ function decisionTree(log, items, ammo, known, useditems, damage = 0, handcuff =
         }
         else log.item.desc = items[0]
 
+        let ff = [
+            "adrenaline",
+            "saw",
+            "handcuffs",
+        ]
+
+        if(ff.includes(items[0])){
+            let skip = log.item.ff = new Node()
+
+
+            let items2 = [...items]
+            let ammo2 = [...ammo]
+            let known2 = [...known]
+            let nextammo2 = -1
+            let useditems2 = []
+            if (useditems.length > 0)
+                useditems2 = [...useditems]
+            if (items2[0] == "adrenaline") {
+                log.item.note = "adrenaline"
+                items2.shift()
+
+            }
+
+            switch (items2[0]) {
+                case 'saw':
+                    sawmult2 = 2
+                    nextammo2 = 1
+                    break;
+                case 'handcuffs':
+                    // console.log("kn in handcuff: ", known2)
+                    handcuff2 = 1
+                    break;
+                default:
+                    console.log("unknown item: ", items2[0])
+
+            }
+
+            useditems2.push(items2[0])
+
+            items2.shift()
+            let ammo_s = ammo2[0] + ammo2[1]
+            if (ammo_s == 1) {
+                il.info = "shotgun emtpy"
+                il.end = true
+            }
+            decisionTree(skip, items2, ammo2, known2, useditems2, damage, handcuff2, sawmult2, nextammo2, inverted2)
+            return log
+
+        }
+
 
         if (p != 0 && nextammo != 0) {
             //live
@@ -666,8 +721,9 @@ function decisionTree(log, items, ammo, known, useditems, damage = 0, handcuff =
                     known2[0] = 1
                     break;
                 case 'handcuffs':
+                    // console.log("kn in handcuff: ", known2)
                     handcuff2 = 1
-                        = 1
+                    // nextammo2 = 1
                     break;
                 default:
                     console.log("unknown item: ", items2[0])
@@ -727,7 +783,7 @@ function decisionTree(log, items, ammo, known, useditems, damage = 0, handcuff =
                     break;
                 case 'handcuffs':
                     handcuff2 = 1
-                    nextammo2 = 0
+                    // nextammo2 = 0
                     break;
                 default:
                     console.log("unknown item: ", items2[0])
