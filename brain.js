@@ -667,7 +667,7 @@ function decisionTree(log, items, ammo, known, useditems, damage = 0, handcuff =
                     break;
                 case 'handcuffs':
                     handcuff2 = 1
-                    nextammo2 = 1
+                        = 1
                     break;
                 default:
                     console.log("unknown item: ", items2[0])
