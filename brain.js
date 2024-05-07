@@ -211,8 +211,7 @@ function odds(ammo, known) {
 
 }
 
-
-function makeDecisionTree(item_perm, ammo, known, p2h = 2) {
+function makeDecisionTree(item_perm, ammo, p2h, known) {
     let root = new Node()
     root.desc = "root"
     root.permutations = []
@@ -220,14 +219,14 @@ function makeDecisionTree(item_perm, ammo, known, p2h = 2) {
         let tmp = new Node()
         tmp.itemlist = item_perm[i]
         root.permutations.push(tmp)
-        decisionTree(tmp, item_perm[i], ammo, known, p2h)
+        decisionTree(tmp, item_perm[i], ammo, p2h, known)
     }
 
     if (item_perm.length <= 0) {
         let tmp = new Node()
         tmp.itemlist = []
         root.permutations.push(tmp)
-        decisionTree(tmp, [], ammo, known, p2h)
+        decisionTree(tmp, [], ammo, p2h, known)
     }
 
     return root
@@ -253,6 +252,7 @@ function crawlerMaster(dectree) {
 
     return masterlog
 }
+
 function evalMaster(dectree) {
     console.log("evaluating branches....")
     let masterlog = []
@@ -343,7 +343,7 @@ function crawlerWorker2(current, masterlog, tmplog) {
 
 
 
-function evalBranch(current) {
+function evalBranch(current, item = false) {
     let isleaf = false
     let win = false
     let damage = 0
@@ -354,7 +354,7 @@ function evalBranch(current) {
     let choice = false
     let forced = false
     let values = []
-
+    let useditem = false;
 
     /*
     choice if:
@@ -403,6 +403,7 @@ function evalBranch(current) {
         indexes.push(current.item)
         names.push("item")
         choice = true
+        useditem = true
     }
     if ("l" in current) {
         indexes.push(current.l)
@@ -419,20 +420,25 @@ function evalBranch(current) {
         names.push("ff")
         forced = false
     }
-
-    // console.log("indexes:", indexes)
+    console.log("indexes:", indexes)
 
     if (indexes.length > 0) {
 
 
         for (let i = 0; i < indexes.length; i++) {
             // console.log(indexes[i])
-            let ret = evalBranch(indexes[i])
+            if (names[i] == "item") {
+                var ret = evalBranch(indexes[i], true)
+            } else {
+                var ret = evalBranch(indexes[i])
+
+            }
             values.push(ret)
         }
 
         let value = values[0]
         let valuename = names[0]
+
 
         // if (choice == false && forced == false)
         //     console.log("stall situation")
@@ -473,6 +479,9 @@ function evalBranch(current) {
         // }
 
         // return [value, valuename, values]
+        if (item) {
+            value -= 0.1
+        }
         current.value = value
         return value
 
@@ -490,7 +499,7 @@ function evalBranch(current) {
 
 
 
-function decisionTree(log, items, ammo, known, useditems, damage = 0, handcuff = 0, sawmult = 1, nextammo = -1, inverted = false) {
+function decisionTree(log, items, ammo, hp, known, useditems = [], damage = 0, handcuff = 0, sawmult = 1, nextammo = -1, inverted = false) {
 
 
     // console.log("in decision tree")
@@ -502,10 +511,10 @@ function decisionTree(log, items, ammo, known, useditems, damage = 0, handcuff =
     let ammo_s = ammo[0] + ammo[1]
     log.useditems = useditems
     // console.log(p2h)
-    // if (p2h <= 0) {
-    //     log.win = true
-    //     return log
-    // }
+    if (hp <= 0) {
+        log.win = true
+        return log
+    }
 
     if (ammo_s <= 0) {
         return log
@@ -546,7 +555,7 @@ function decisionTree(log, items, ammo, known, useditems, damage = 0, handcuff =
                 ssl.info = "shotgun emtpy"
                 ssl.end = true
             } else if (handcuff) {
-                decisionTree(ssl, items2, ammo2, known2, useditems, damage - sawmult,)
+                decisionTree(ssl, items2, ammo2, hp, known2, useditems, damage - sawmult,)
             } else {
                 //no handc no followup shot
                 ssl.end = true
@@ -565,7 +574,7 @@ function decisionTree(log, items, ammo, known, useditems, damage = 0, handcuff =
                 log.ss.b.damage = damage
                 log.ss.b.end = true
             }
-            decisionTree(log.ss.b, items2, ammo2, known2, useditems, damage, handcuff)
+            decisionTree(log.ss.b, items2, ammo2, hp, known2, useditems, damage, handcuff)
         }
 
     }
@@ -587,8 +596,11 @@ function decisionTree(log, items, ammo, known, useditems, damage = 0, handcuff =
             if (ammo_s == 1) {
                 sdl.info = "shotgun emtpy"
                 sdl.end = true
+                if (hp - sawmult <= 0) {
+                    sdl.win = true
+                }
             } else if (handcuff) {
-                decisionTree(sdl, items2, ammo2, known2, useditems, damage + sawmult)
+                decisionTree(sdl, items2, ammo2, hp - sawmult, known2, useditems, damage + sawmult)
             } else {
                 //no handc no followup shot
                 sdl.end = true
@@ -607,7 +619,7 @@ function decisionTree(log, items, ammo, known, useditems, damage = 0, handcuff =
                 sdb.info = "shotgun emtpy"
                 sdb.end = true
             } else if (handcuff) {
-                decisionTree(sdb, items2, ammo2, known2, useditems, damage)
+                decisionTree(sdb, items2, ammo2, hp, known2, useditems, damage)
             }
         }
 
@@ -636,7 +648,7 @@ function decisionTree(log, items, ammo, known, useditems, damage = 0, handcuff =
             "handcuffs",
         ]
 
-        if(ff.includes(items[0])){
+        if (ff.includes(items[0])) {
             let skip = log.item.ff = new Node()
 
 
@@ -672,10 +684,10 @@ function decisionTree(log, items, ammo, known, useditems, damage = 0, handcuff =
             items2.shift()
             let ammo_s = ammo2[0] + ammo2[1]
             if (ammo_s == 1) {
-                il.info = "shotgun emtpy"
-                il.end = true
+                skip.info = "shotgun emtpy"
+                skip.end = true
             }
-            decisionTree(skip, items2, ammo2, known2, useditems2, damage, handcuff2, sawmult2, nextammo2, inverted2)
+            decisionTree(skip, items2, ammo2, hp, known2, useditems2, damage, handcuff2, sawmult2, nextammo2, inverted2)
             return log
 
         }
@@ -738,7 +750,7 @@ function decisionTree(log, items, ammo, known, useditems, damage = 0, handcuff =
                 il.info = "shotgun emtpy"
                 il.end = true
             }
-            decisionTree(il, items2, ammo2, known2, useditems2, damage, handcuff2, sawmult2, nextammo2, inverted2)
+            decisionTree(il, items2, ammo2, hp, known2, useditems2, damage, handcuff2, sawmult2, nextammo2, inverted2)
 
         }
         if (p != 1 && nextammo != 1) {
@@ -795,7 +807,7 @@ function decisionTree(log, items, ammo, known, useditems, damage = 0, handcuff =
                 ib.info = "shotgun emtpy"
                 ib.end = true
             }
-            decisionTree(ib, items2, ammo2, known2, useditems2, damage, handcuff2, sawmult2, nextammo2, inverted2)
+            decisionTree(ib, items2, ammo2, hp, known2, useditems2, damage, handcuff2, sawmult2, nextammo2, inverted2)
         }
     }
 
@@ -853,7 +865,7 @@ function compute(data) {
     // let rec = rec_shoot(ammo2, known2, new Node(1))
     // let out = solve2(perm, cheatammo, ammo, known)
 
-    let out = makeDecisionTree(perm, ammo, known, p2h)
+    let out = makeDecisionTree(perm, ammo, p2h, known)
     console.log("-----------------------------------------------------")
 
     let crwl = crawlerMaster(out)
