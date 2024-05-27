@@ -233,9 +233,9 @@ function makeDecisionTree(item_perm, ammo, p2h, known) {
 }
 
 function crawlerMaster(dectree) {
-    console.log("crawling....")
+    // console.log("crawling....")
     let masterlog = []
-    console.log("crawling perms: ", dectree.permutations.length)
+    // console.log("crawling perms: ", dectree.permutations.length)
     for (let i = 0; i < dectree.permutations.length; i++) {
         let current = dectree.permutations[i];
         let log = []
@@ -420,7 +420,7 @@ function evalBranch(current, item = false) {
         names.push("ff")
         forced = false
     }
-    console.log("indexes:", indexes)
+    // console.log("indexes:", indexes)
 
     if (indexes.length > 0) {
 
@@ -874,6 +874,8 @@ function compute(data) {
 
     let ricBranch = evalMaster(out)
     out.values = ricBranch
+
+
 
     return out
 }
